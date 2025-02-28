@@ -37,6 +37,8 @@ export interface LessonPlanData {
     achievedOutcomes: string;
     homework: string;
   }[];
+  isEnglishTemplate?: boolean; // Flag for English template
+  numberOfClasses?: string; // Additional fields for English template
 }
 
 // Mock data for subjects and grades
@@ -68,6 +70,11 @@ export const grades = [
 
 // Generate lesson plan data based on the subject, grade and lesson title
 const generateMockLessonPlan = (input: LessonPlanInput): LessonPlanData => {
+  // Check if the subject is English Language
+  if (input.subject === "اللغة الإنجليزية") {
+    return generateEnglishLessonPlan(input);
+  }
+
   // Base structure for Jordanian curriculum lesson plans
   const baseLessonStructure = {
     teachingStrategies: [
@@ -585,9 +592,103 @@ const generateMockLessonPlan = (input: LessonPlanInput): LessonPlanData => {
   };
 };
 
+// Function to generate English lesson plan format - ALL CONTENT IN ENGLISH
+const generateEnglishLessonPlan = (input: LessonPlanInput): LessonPlanData => {
+  // Convert Arabic grade to English format if needed
+  let gradeInEnglish = input.grade;
+  if (input.grade.includes("الصف")) {
+    const gradeMap: {[key: string]: string} = {
+      "الصف الأول": "Grade 1",
+      "الصف الثاني": "Grade 2",
+      "الصف الثالث": "Grade 3",
+      "الصف الرابع": "Grade 4",
+      "الصف الخامس": "Grade 5",
+      "الصف السادس": "Grade 6",
+      "الصف السابع": "Grade 7",
+      "الصف الثامن": "Grade 8",
+      "الصف التاسع": "Grade 9",
+      "الصف العاشر": "Grade 10",
+      "الصف الحادي عشر": "Grade 11",
+      "الصف الثاني عشر": "Grade 12",
+    };
+    gradeInEnglish = gradeMap[input.grade] || input.grade;
+  }
+
+  // Create English format lesson plan
+  return {
+    subject: "English Language",
+    grade: gradeInEnglish,
+    lessonTitle: input.lessonTitle,
+    date: input.date,
+    teacherName: input.teacherName,
+    isEnglishTemplate: true, // Flag to identify English template
+    numberOfClasses: "1", // Default value for number of classes
+    objectives: [
+      `By the end of this lesson, students will be able to identify key vocabulary related to ${input.lessonTitle}`,
+      `By the end of this lesson, students will be able to use the target language of ${input.lessonTitle} accurately`,
+      `By the end of this lesson, students will be able to demonstrate comprehension of ${input.lessonTitle} through speaking activities`,
+      `By the end of this lesson, students will be able to produce written responses related to ${input.lessonTitle}`,
+      `By the end of this lesson, students will be able to engage in communicative activities about ${input.lessonTitle}`
+    ],
+    teachingStrategies: [
+      "Communicative Language Teaching",
+      "Total Physical Response",
+      "Task-based Learning",
+      "Cooperative Learning"
+    ],
+    assessmentStrategies: [
+      "Formative Assessment",
+      "Performance Assessment",
+      "Self-Assessment"
+    ],
+    assessmentTools: [
+      "Observation Checklist",
+      "Rubric",
+      "Exit Ticket"
+    ],
+    materialsAndResources: [
+      "Student's Book",
+      "Activity Sheets",
+      "Flashcards",
+      "Audio recordings",
+      "Interactive whiteboard"
+    ],
+    timeManagement: [],
+    priorLearning: `Students have been introduced to basic vocabulary and grammar structures related to ${input.lessonTitle} in previous grades according to the Jordanian English curriculum`,
+    horizontalIntegration: `Science (scientific terms related to ${input.lessonTitle}), Social Studies (cultural aspects of ${input.lessonTitle})`,
+    verticalIntegration: `Students will build on these language skills in future grades when they study more complex aspects of ${input.lessonTitle} according to the Jordanian curriculum progression`,
+    procedures: [
+      { activity: `Warm-up: Engage students with a quick activity to introduce ${input.lessonTitle}`, time: "5 minutes" },
+      { activity: `Presentation: Introduce new vocabulary and language structures related to ${input.lessonTitle}`, time: "10 minutes" },
+      { activity: `Practice: Guided practice of new language through controlled activities about ${input.lessonTitle}`, time: "15 minutes" },
+      { activity: `Group work: Students work in pairs/groups to complete communicative tasks about ${input.lessonTitle}`, time: "10 minutes" },
+      { activity: `Production: Students demonstrate their learning through speaking or writing about ${input.lessonTitle}`, time: "10 minutes" },
+      { activity: "Closure: Summarize the lesson and check understanding through quick assessment", time: "5 minutes" }
+    ],
+    selfReflection: "I am satisfied with the students' participation and their ability to use the target language",
+    challengesFaced: "Some students struggled with the pronunciation of new vocabulary",
+    improvementSuggestions: "Provide more audio examples and pronunciation practice in future lessons",
+    dailyFollowUpTable: [
+      {
+        date: "",
+        section: "",
+        class: "",
+        achievedOutcomes: "",
+        homework: ""
+      }
+    ]
+  };
+};
+
 // Gemini API service
 export const generateLessonPlan = async (input: LessonPlanInput): Promise<LessonPlanData> => {
   try {
+    // If English language is selected, directly return English format without API call
+    if (input.subject === "اللغة الإنجليزية") {
+      console.log("Generating English format lesson plan");
+      return generateEnglishLessonPlan(input);
+    }
+    
     console.log("Starting to generate lesson plan with input:", input);
     const API_KEY = "AIzaSyDoABAcPMgYKBUgby8LsQoNPczO9I51yBU";
     const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
