@@ -5,15 +5,17 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Download, Printer } from "lucide-react";
+import { ArrowLeft, Download, Printer, ZoomIn, ZoomOut } from "lucide-react";
 import { LessonPlanData } from "@/services/api";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { Slider } from "@/components/ui/slider";
 
 const PDFView = () => {
   const navigate = useNavigate();
   const [lessonPlan, setLessonPlan] = useState<LessonPlanData | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [fontSize, setFontSize] = useState(5); // Default font size set to 5px (reduced from 10px)
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,6 +78,10 @@ const PDFView = () => {
     window.print();
   };
 
+  const handleFontSizeChange = (value: number[]) => {
+    setFontSize(value[0]);
+  };
+
   if (!lessonPlan) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 p-4">
@@ -89,7 +95,7 @@ const PDFView = () => {
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-gray-50 to-gray-100 p-4">
       <div className="mx-auto w-full max-w-[1024px] px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 print:hidden">
           <Button
             variant="ghost"
             className="text-gray-500 hover:text-gray-700"
@@ -120,6 +126,25 @@ const PDFView = () => {
           </div>
         </div>
         
+        <div className="flex items-center justify-between mb-4 print:hidden">
+          <div className="flex items-center gap-2">
+            <ZoomOut className="h-4 w-4 text-gray-500" />
+            <div className="w-40">
+              <Slider
+                defaultValue={[fontSize]}
+                max={10}
+                min={3}
+                step={0.5}
+                onValueChange={handleFontSizeChange}
+              />
+            </div>
+            <ZoomIn className="h-4 w-4 text-gray-500" />
+          </div>
+          <div className="text-sm text-gray-500">
+            حجم الخط: {fontSize}
+          </div>
+        </div>
+        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -130,13 +155,17 @@ const PDFView = () => {
               <div
                 ref={pdfRef}
                 className="pdf-container bg-white p-4"
-                style={{ width: "100%", minHeight: "842px" }}
+                style={{ 
+                  width: "100%", 
+                  minHeight: "842px",
+                  fontSize: `${fontSize}px`
+                }}
               >
                 <div className="text-center mb-3">
                   <h2 className="text-xl font-bold">خطة درس</h2>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-x-4 mb-2 text-xs">
+                <div className="grid grid-cols-3 gap-x-4 mb-2">
                   <div className="text-right">
                     <span className="font-semibold">الصف: </span>
                     <span>{lessonPlan.grade}</span>
@@ -151,7 +180,7 @@ const PDFView = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-x-4 mb-3 text-xs">
+                <div className="grid grid-cols-2 gap-x-4 mb-3">
                   <div className="text-right">
                     <span className="font-semibold">التاريخ: </span>
                     <span>{lessonPlan.date}</span>
@@ -162,7 +191,7 @@ const PDFView = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-x-4 mb-3 text-xs">
+                <div className="grid grid-cols-2 gap-x-4 mb-3">
                   <div className="text-right">
                     <span className="font-semibold">التكامل الأفقي: </span>
                     <span>{lessonPlan.horizontalIntegration}</span>
@@ -173,7 +202,7 @@ const PDFView = () => {
                   </div>
                 </div>
                 
-                <table className="pdf-table text-xs">
+                <table className="pdf-table">
                   <thead>
                     <tr>
                       <th rowSpan={2} className="w-10">الرقم</th>
@@ -260,22 +289,22 @@ const PDFView = () => {
                   </tbody>
                 </table>
                 
-                <div className="mt-3 text-right text-xs">
+                <div className="mt-3 text-right">
                   <div className="font-semibold mb-1">التأمل الذاتي (الشعور بالرضا عن):</div>
                   <div className="border p-2 min-h-[40px]">{lessonPlan.selfReflection}</div>
                 </div>
                 
-                <div className="mt-2 text-right text-xs">
+                <div className="mt-2 text-right">
                   <div className="font-semibold mb-1">تحديات واجهتني:</div>
                   <div className="border p-2 min-h-[40px]">{lessonPlan.challengesFaced}</div>
                 </div>
                 
-                <div className="mt-2 text-right text-xs">
+                <div className="mt-2 text-right">
                   <div className="font-semibold mb-1">اقتراحات للتحسين:</div>
                   <div className="border p-2 min-h-[40px]">{lessonPlan.improvementSuggestions}</div>
                 </div>
                 
-                <div className="mt-3 text-xs">
+                <div className="mt-3">
                   <div className="font-semibold mb-1 text-right">(جدول المتابعة اليومي)</div>
                   <table className="pdf-table">
                     <thead>
@@ -301,7 +330,7 @@ const PDFView = () => {
                   </table>
                 </div>
                 
-                <div className="mt-3 grid grid-cols-3 gap-4 text-xs">
+                <div className="mt-3 grid grid-cols-3 gap-4">
                   <div className="text-center">
                     <p>إعداد المعلم: {lessonPlan.teacherName}</p>
                   </div>
@@ -313,7 +342,7 @@ const PDFView = () => {
                   </div>
                 </div>
                 
-                <div className="mt-1 text-center text-xs">
+                <div className="mt-1 text-center">
                   <p>توقيع المشرف التربوي:</p>
                 </div>
                 
@@ -324,7 +353,7 @@ const PDFView = () => {
             </CardContent>
           </Card>
           
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center print:hidden">
             <p className="text-sm text-gray-500 mb-4">
               يمكنك تحميل ملف PDF أو طباعة الخطة مباشرة
             </p>

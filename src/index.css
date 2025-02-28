@@ -116,7 +116,6 @@
   direction: rtl;
   max-width: 100%;
   margin: 0 auto;
-  font-size: 10px;
 }
 
 .pdf-table {
@@ -167,4 +166,21 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(136, 136, 136, 0.3);
+}
+
+/* Print styles */
+@media print {
+  .print-hidden, .print\:hidden {
+    display: none !important;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .pdf-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }
