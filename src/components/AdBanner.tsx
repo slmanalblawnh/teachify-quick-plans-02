@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 interface AdBannerProps {
   slot?: string;
@@ -16,7 +16,6 @@ const AdBanner = ({
   responsive = true,
   printHidden = true
 }: AdBannerProps) => {
-  const adRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     try {
@@ -39,7 +38,6 @@ const AdBanner = ({
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive={responsive ? "true" : "false"}
-        ref={adRef}
       />
     </div>
   );
