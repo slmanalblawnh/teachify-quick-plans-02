@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -15,7 +14,7 @@ const PDFView = () => {
   const navigate = useNavigate();
   const [lessonPlan, setLessonPlan] = useState<LessonPlanData | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [fontSize, setFontSize] = useState(5); // Default font size set to 5px (reduced from 10px)
+  const [fontSize, setFontSize] = useState(5); // Default font size
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,32 +36,82 @@ const PDFView = () => {
     setIsGeneratingPDF(true);
     
     try {
+      // Add a temporary class to the container before capturing
+      // This ensures proper styling during capture
+      pdfRef.current.classList.add("generating-pdf");
+      
+      // Improved configuration for html2canvas
       const canvas = await html2canvas(pdfRef.current, {
-        scale: 2,
+        scale: 2, // Higher scale for better quality
         useCORS: true,
         logging: false,
         allowTaint: true,
+        windowWidth: 1200, // Set a fixed width to ensure consistency
+        windowHeight: 1600, // Ensure enough height
+        onclone: (clonedDoc) => {
+          // Ensure the cloned document has proper styling
+          const clonedElement = clonedDoc.getElementById(pdfRef.current?.id || '');
+          if (clonedElement) {
+            clonedElement.style.width = "1100px";
+            clonedElement.style.padding = "20px";
+            clonedElement.style.margin = "0";
+          }
+        }
       });
+      
+      // Remove temporary class
+      pdfRef.current.classList.remove("generating-pdf");
       
       const imgData = canvas.toDataURL("image/png");
       
-      // Create PDF in landscape orientation
+      // Create PDF in landscape orientation with proper dimensions
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "mm",
+        format: "a4", // Using standard A4 format
       });
       
-      const imgWidth = 297; // A4 landscape width in mm
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate image dimensions to fit the PDF properly
+      const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      // If content is taller than page, we may need to add additional pages
+      if (imgHeight > pdfHeight) {
+        // Add first page
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight, '', 'FAST');
+        
+        // Calculate number of pages needed
+        const pageCount = Math.ceil(imgHeight / pdfHeight);
+        
+        // Add additional pages if needed
+        for (let i = 1; i < pageCount; i++) {
+          pdf.addPage();
+          // Position the image negatively to show the appropriate portion on each page
+          pdf.addImage(
+            imgData, 
+            "PNG", 
+            0, 
+            -pdfHeight * i, 
+            imgWidth, 
+            imgHeight, 
+            '', 
+            'FAST'
+          );
+        }
+      } else {
+        // Content fits on a single page
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight, '', 'FAST');
+      }
       
       // Add information footer
       pdf.setFontSize(8);
       pdf.setTextColor(100, 100, 100);
-      pdf.text("خطة درس - تم إنشاؤها بواسطة تطبيق إعداد خطط الدروس", 10, 205);
+      pdf.text("خطة درس - تم إنشاؤها بواسطة تطبيق إعداد خطط الدروس", 10, pdfHeight - 5);
       
-      // Download PDF
+      // Download PDF with the lesson title
       pdf.save(`خطة درس - ${lessonPlan?.lessonTitle || "جديد"}.pdf`);
       
       toast.success("تم إنشاء ملف PDF بنجاح");
@@ -154,6 +203,7 @@ const PDFView = () => {
             <CardContent className="p-0">
               <div
                 ref={pdfRef}
+                id="pdf-content"
                 className="pdf-container bg-white p-4"
                 style={{ 
                   width: "100%", 
