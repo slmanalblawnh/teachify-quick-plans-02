@@ -16,7 +16,7 @@ const AdBanner = ({
   responsive = true,
   printHidden = true
 }: AdBannerProps) => {
-  const adRef = useRef<HTMLDivElement>(null);
+  const adRef = useRef<HTMLInsElement>(null);
 
   useEffect(() => {
     try {
