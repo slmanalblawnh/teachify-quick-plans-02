@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 
 // Define interface for the lesson plan input
@@ -489,4 +490,141 @@ const generateMockLessonPlan = (input: LessonPlanInput): LessonPlanData => {
           `أن يتعرف الطالب على مفهوم ${input.lessonTitle} وأنواعه`,
           `أن يميز الطالب بين ${input.lessonTitle} وغيره من الأساليب البلاغية`,
           `أن يحلل الطالب نصوصاً أدبية تتضمن ${input.lessonTitle}`,
-          `أن يستخرج
+          `أن يستخرج الطالب أمثلة على ${input.lessonTitle} من نصوص مختارة`,
+          `أن يوظف الطالب ${input.lessonTitle} في تعبيره الكتابي`,
+          `أن يذوق الطالب جمال التعبير البلاغي في ${input.lessonTitle}`
+        ],
+        materialsAndResources: [
+          "كتاب اللغة العربية المقرر من وزارة التربية والتعليم الأردنية",
+          "نصوص أدبية مختارة تتضمن الأساليب البلاغية",
+          "لوحات جدارية توضح أنواع الأساليب البلاغية",
+          "بطاقات للأمثلة البلاغية وشرحها",
+          "أوراق عمل وتدريبات تطبيقية"
+        ],
+        procedures: [
+          { activity: `التمهيد بعرض أمثلة أدبية جميلة تتضمن ${input.lessonTitle}`, time: "5 دقائق" },
+          { activity: `شرح مفهوم ${input.lessonTitle} وأنواعه مع التمثيل`, time: "15 دقيقة" },
+          { activity: `تحليل نماذج من ${input.lessonTitle} في نصوص مختارة`, time: "10 دقائق" },
+          { activity: "تدريبات فردية على استخراج وتحليل الصور البلاغية", time: "10 دقائق" },
+          { activity: `نشاط إبداعي: كتابة فقرات قصيرة توظف ${input.lessonTitle}`, time: "10 دقائق" },
+          { activity: "عرض إنتاج الطلبة ومناقشته وتقييمه", time: "5 دقائق" }
+        ],
+        priorLearning: "المفاهيم اللغوية الأساسية وتذوق النصوص الأدبية وفق المنهاج الأردني للصفوف السابقة",
+        horizontalIntegration: "التربية الإسلامية (التذوق البلاغي للنصوص القرآنية والحديث الشريف)، التاريخ (دراسة النصوص الأدبية في سياقها التاريخي)",
+        verticalIntegration: `سيتوسع الطلبة في الصفوف العليا وفق المنهاج الأردني في دراسة الفنون البلاغية المختلفة وعلاقتها بـ${input.lessonTitle}`
+      };
+    } else {
+      // Default Arabic language lesson plan for Jordanian curriculum
+      customLessonPlan = {
+        objectives: [
+          `أن يقرأ الطالب نصوص ${input.lessonTitle} قراءة سليمة مراعياً مخارج الحروف`,
+          `أن يحلل الطالب بنية ${input.lessonTitle} وخصائصه اللغوية`,
+          `أن يستخرج الطالب الأفكار الرئيسية والفرعية في ${input.lessonTitle}`,
+          `أن يوظف الطالب مفردات وتراكيب جديدة من ${input.lessonTitle} في سياقات لغوية مختلفة`,
+          `أن يعبر الطالب عن فهمه لـ${input.lessonTitle} شفوياً وكتابياً`,
+          `أن يبدي الطالب رأيه في ${input.lessonTitle} مع التعليل`
+        ],
+        materialsAndResources: [
+          "كتاب اللغة العربية المقرر من وزارة التربية والتعليم الأردنية",
+          "نصوص إثرائية مرتبطة بالدرس",
+          "بطاقات للمفردات الجديدة ومعانيها",
+          "وسائل سمعية وبصرية مساندة",
+          "أوراق عمل وأنشطة تطبيقية متنوعة"
+        ],
+        procedures: [
+          { activity: `التمهيد بإثارة انتباه الطلبة نحو موضوع ${input.lessonTitle} من خلال أسئلة تحفيزية`, time: "5 دقائق" },
+          { activity: `قراءة نموذجية لـ${input.lessonTitle} مع مراعاة جودة الأداء`, time: "10 دقائق" },
+          { activity: "قراءات فردية من الطلبة مع التصويب والتوجيه", time: "10 دقائق" },
+          { activity: `شرح المفردات الجديدة وتحليل محتوى ${input.lessonTitle}`, time: "15 دقيقة" },
+          { activity: `نشاط تطبيقي على ${input.lessonTitle} (تلخيص، إعادة صياغة، تعبير موجه)`, time: "10 دقائق" },
+          { activity: "تقييم فهم الطلبة من خلال أسئلة شاملة وتلخيص لأهم النقاط", time: "5 دقائق" }
+        ],
+        priorLearning: "المهارات اللغوية الأساسية في القراءة والكتابة والتحدث والاستماع وفق المنهاج الأردني للصفوف السابقة",
+        horizontalIntegration: `التربية الاجتماعية (ربط موضوع ${input.lessonTitle} بالبيئة الأردنية)، التربية الإسلامية (استخراج القيم والمبادئ من ${input.lessonTitle})`,
+        verticalIntegration: `سيتعمق الطلبة في الصفوف العليا وفق المنهاج الأردني في دراسة الأنماط اللغوية المختلفة وصولاً إلى التحليل النقدي لـ${input.lessonTitle}`
+      };
+    }
+  }
+
+  // Add default lesson plan for other subjects
+  else {
+    customLessonPlan = {
+      objectives: [
+        `أن يتعرف الطالب على المفاهيم الأساسية المرتبطة بـ${input.lessonTitle}`,
+        `أن يشرح الطالب العناصر الرئيسية في ${input.lessonTitle}`,
+        `أن يحلل الطالب محتوى ${input.lessonTitle} بطريقة منهجية`,
+        `أن يطبق الطالب المعرفة المكتسبة من ${input.lessonTitle} في مواقف جديدة`,
+        `أن يقيّم الطالب أهمية ${input.lessonTitle} في سياق المادة الدراسية`,
+        `أن يبدع الطالب تطبيقات جديدة تعكس فهمه لـ${input.lessonTitle}`
+      ],
+      materialsAndResources: [
+        `كتاب ${input.subject} المقرر من وزارة التربية والتعليم الأردنية`,
+        "وسائل تعليمية سمعية وبصرية مرتبطة بالدرس",
+        "أوراق عمل وأنشطة إثرائية",
+        "مصادر تعلم رقمية معتمدة من الوزارة",
+        "مواد تقييم متنوعة"
+      ],
+      timeManagement: [
+        { activity: "التمهيد وتنشيط المعرفة السابقة", time: "5 دقائق" },
+        { activity: "عرض المفاهيم الرئيسية للدرس", time: "15 دقيقة" },
+        { activity: "تطبيق عملي وأنشطة تفاعلية", time: "15 دقيقة" },
+        { activity: "مناقشة وتحليل نتائج الأنشطة", time: "10 دقائق" },
+        { activity: "تلخيص وتقييم", time: "5 دقائق" }
+      ],
+      procedures: [
+        { activity: `التمهيد للدرس وربطه بالخبرات السابقة للطلبة حول ${input.lessonTitle}`, time: "5 دقائق" },
+        { activity: `عرض المفاهيم الرئيسية لـ${input.lessonTitle} بطريقة منظمة ومشوقة`, time: "15 دقيقة" },
+        { activity: `تنفيذ أنشطة تطبيقية متنوعة على ${input.lessonTitle}`, time: "15 دقيقة" },
+        { activity: "مناقشة وتحليل نتائج الأنشطة وتقديم التغذية الراجعة", time: "10 دقائق" },
+        { activity: "تلخيص أهم النقاط في الدرس وتقييم تعلم الطلبة", time: "5 دقائق" }
+      ],
+      priorLearning: `المفاهيم والمهارات الأساسية المرتبطة بـ${input.lessonTitle} وفق المنهاج الأردني للصفوف السابقة`,
+      horizontalIntegration: `ربط ${input.lessonTitle} بالمواد الدراسية الأخرى ذات الصلة وبالبيئة المحلية الأردنية`,
+      verticalIntegration: `سيتوسع الطلبة في الصفوف العليا وفق المنهاج الأردني في دراسة ${input.lessonTitle} بشكل أكثر عمقاً وشمولية`
+    };
+  }
+
+  // Create daily follow-up table
+  const dailyFollowUpTable = [
+    {
+      date: input.date,
+      section: "أ",
+      class: "1",
+      achievedOutcomes: "تم تحقيق النتاجات المخطط لها بنسبة 85%",
+      homework: "حل أسئلة الكتاب صفحة 45"
+    },
+    {
+      date: input.date,
+      section: "ب",
+      class: "1",
+      achievedOutcomes: "تم تحقيق النتاجات المخطط لها بنسبة 90%",
+      homework: "حل أسئلة الكتاب صفحة 45"
+    }
+  ];
+
+  // Merge the base lesson structure, custom plan, and other required fields for final output
+  return {
+    ...input,
+    ...baseLessonStructure,
+    ...customLessonPlan,
+    dailyFollowUpTable
+  };
+};
+
+// Function to simulate API call with mock data
+export const generateLessonPlan = async (input: LessonPlanInput): Promise<LessonPlanData> => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  try {
+    // Return mock data
+    const lessonPlan = generateMockLessonPlan(input);
+    toast.success("تم إنشاء خطة الدرس بنجاح");
+    return lessonPlan;
+  } catch (error) {
+    toast.error("حدث خطأ أثناء إنشاء خطة الدرس");
+    console.error("Error generating lesson plan:", error);
+    // Return a basic plan in case of error
+    return generateMockLessonPlan(input);
+  }
+};
