@@ -1,4 +1,4 @@
-<lov-code>
+
 import { toast } from "sonner";
 
 // Define interface for the lesson plan input
@@ -67,6 +67,85 @@ export const grades = [
   "الصف الحادي عشر",
   "الصف الثاني عشر",
 ];
+
+// Function to generate English lesson plan
+const generateEnglishLessonPlan = (input: LessonPlanInput): LessonPlanData => {
+  // Create English-specific lesson plan structure
+  return {
+    ...input,
+    isEnglishTemplate: true,
+    numberOfClasses: "5", // Default number of classes
+    objectives: [
+      `Students will be able to understand the main ideas of ${input.lessonTitle}`,
+      `Students will be able to use key vocabulary related to ${input.lessonTitle}`,
+      `Students will be able to practice speaking about ${input.lessonTitle}`,
+      `Students will be able to write short paragraphs about ${input.lessonTitle}`,
+      `Students will be able to answer comprehension questions about ${input.lessonTitle}`
+    ],
+    teachingStrategies: [
+      "Communicative approach",
+      "Task-based learning",
+      "Total physical response (TPR)",
+      "Collaborative learning",
+      "Direct method"
+    ],
+    assessmentStrategies: [
+      "Formative assessment",
+      "Peer assessment",
+      "Self-assessment",
+      "Performance-based assessment"
+    ],
+    assessmentTools: [
+      "Rubrics",
+      "Oral presentations",
+      "Written assignments",
+      "Quizzes"
+    ],
+    materialsAndResources: [
+      "Student's Book",
+      "Workbook",
+      "Flashcards related to the lesson",
+      "Audio recordings",
+      "Interactive whiteboard resources"
+    ],
+    timeManagement: [
+      { activity: "Warm-up activity and review of previous lesson", time: "5 minutes" },
+      { activity: "Presentation of new vocabulary and structures", time: "15 minutes" },
+      { activity: "Guided practice activities", time: "15 minutes" },
+      { activity: "Independent practice and application", time: "10 minutes" },
+      { activity: "Wrap-up and assessment", time: "5 minutes" }
+    ],
+    priorLearning: `Students have already learned basic vocabulary and structures related to similar topics in previous grades according to the Jordan national curriculum`,
+    horizontalIntegration: `This lesson integrates with Social Studies (cultural aspects of ${input.lessonTitle}) and Art (creating visual representations)`,
+    verticalIntegration: `This knowledge will be expanded in future grades with more complex vocabulary and grammatical structures related to ${input.lessonTitle}`,
+    procedures: [
+      { activity: `Warm-up: Show pictures related to ${input.lessonTitle} and ask students to identify what they see`, time: "5 minutes" },
+      { activity: `Presentation: Introduce new vocabulary and structures related to ${input.lessonTitle} using visuals and realia`, time: "10 minutes" },
+      { activity: `Guided Practice: Have students practice using the new language in pairs or small groups`, time: "15 minutes" },
+      { activity: `Production: Students create their own dialogues or written work using the target language`, time: "15 minutes" },
+      { activity: `Closure: Review the main points of the lesson and assign homework`, time: "5 minutes" }
+    ],
+    selfReflection: "The lesson was well-received by the students. They participated actively in all activities and demonstrated understanding of the key concepts.",
+    challengesFaced: "Some students struggled with pronouncing certain words. More pronunciation practice should be incorporated in future lessons.",
+    improvementSuggestions: "Include more visual aids and real-life examples to enhance understanding. Consider grouping students of mixed abilities to support weaker students.",
+    dailyFollowUpTable: [
+      {
+        date: input.date,
+        section: "A",
+        class: "10",
+        achievedOutcomes: "Most students achieved the learning objectives",
+        homework: "Workbook exercises 1-3, page 24"
+      },
+      {
+        date: input.date,
+        section: "B",
+        class: "10",
+        achievedOutcomes: "All students achieved the learning objectives",
+        homework: "Workbook exercises 1-3, page 24"
+      }
+    ]
+  };
+};
 
 // Generate lesson plan data based on the subject, grade and lesson title
 const generateMockLessonPlan = (input: LessonPlanInput): LessonPlanData => {
@@ -458,4 +537,57 @@ const generateMockLessonPlan = (input: LessonPlanInput): LessonPlanData => {
           { activity: "قراءات فردية من الطلبة مع مناقشة المفردات الصعبة", time: "10 دقائق" },
           { activity: `تحليل الأفكار الرئيسية والفرعية في ${input.lessonTitle}`, time: "15 دقيقة" },
           { activity: "نشاط تعاوني: استخراج الأساليب اللغوية والصور الفنية", time: "10 دقائق" },
-          { activity: "تلخيص المفاهيم الرئيسية وتقييم فهم الطلبة", time: "
+          { activity: "تلخيص المفاهيم الرئيسية وتقييم فهم الطلبة", time: "5 دقائق" }
+        ],
+        priorLearning: `المهارات اللغوية الأساسية المرتبطة بـ${input.lessonTitle} وفق المنهاج الأردني للصفوف السابقة`,
+        horizontalIntegration: `التربية الإسلامية (القيم والأخلاق في ${input.lessonTitle})، الدراسات الاجتماعية (ربط موضوع ${input.lessonTitle} بالواقع الأردني)`,
+        verticalIntegration: `سيتوسع الطلبة في الصفوف العليا وفق المنهاج الأردني في دراسة نصوص أدبية أكثر تعقيداً مرتبطة بـ${input.lessonTitle}`
+      };
+    }
+  }
+
+  // Combine base lesson structure with custom lesson plan
+  return {
+    ...input,
+    objectives: customLessonPlan?.objectives || [`أن يتعرف الطالب على ${input.lessonTitle}`],
+    teachingStrategies: baseLessonStructure.teachingStrategies,
+    assessmentStrategies: baseLessonStructure.assessmentStrategies,
+    assessmentTools: baseLessonStructure.assessmentTools,
+    materialsAndResources: customLessonPlan?.materialsAndResources || ["كتاب الطالب", "السبورة", "أوراق عمل"],
+    timeManagement: [
+      { activity: "التمهيد والمقدمة", time: "5 دقائق" },
+      { activity: "العرض والشرح", time: "20 دقيقة" },
+      { activity: "التطبيق والتدريب", time: "15 دقيقة" },
+      { activity: "التقويم الختامي", time: "5 دقائق" }
+    ],
+    procedures: customLessonPlan?.procedures || [
+      { activity: "التمهيد للدرس", time: "5 دقائق" },
+      { activity: "شرح المفاهيم الرئيسية", time: "15 دقيقة" },
+      { activity: "نشاط تطبيقي", time: "15 دقيقة" },
+      { activity: "تقويم ختامي", time: "5 دقائق" },
+      { activity: "توزيع الواجب المنزلي", time: "5 دقائق" }
+    ],
+    priorLearning: customLessonPlan?.priorLearning || `معرفة الطلبة بالمفاهيم الأساسية المرتبطة بـ${input.lessonTitle}`,
+    horizontalIntegration: customLessonPlan?.horizontalIntegration || `التكامل مع المواد الدراسية الأخرى`,
+    verticalIntegration: customLessonPlan?.verticalIntegration || `التكامل مع مفاهيم ومهارات سيدرسها الطلبة في الصفوف اللاحقة`,
+    selfReflection: baseLessonStructure.selfReflection,
+    challengesFaced: baseLessonStructure.challengesFaced,
+    improvementSuggestions: baseLessonStructure.improvementSuggestions,
+    dailyFollowUpTable: [
+      {
+        date: input.date,
+        section: "أ",
+        class: "الحصة الأولى",
+        achievedOutcomes: "تم تحقيق معظم النتاجات المستهدفة",
+        homework: "حل أسئلة الكتاب صفحة 25"
+      },
+      {
+        date: input.date,
+        section: "ب",
+        class: "الحصة الثانية",
+        achievedOutcomes: "تم تحقيق جميع النتاجات المستهدفة",
+        homework: "حل أسئلة الكتاب صفحة 25"
+      }
+    ]
+  };
+};
