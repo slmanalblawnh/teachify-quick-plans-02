@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import AdBanner from "@/components/AdBanner";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ const Index = () => {
           </p>
         </motion.div>
       </header>
+      
+      <AdBanner className="mx-auto max-w-5xl" />
       
       <main className="flex-1 px-4 py-12">
         <div className="mx-auto max-w-5xl">
@@ -118,6 +121,8 @@ const Index = () => {
           </div>
         </div>
       </main>
+      
+      <AdBanner className="mx-auto max-w-5xl" />
       
       <footer className="py-6 text-center text-sm text-gray-500">
         <p>تطبيق إعداد خطط الدروس © {new Date().getFullYear()}</p>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -12,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Download, FileText, Save } from "lucide-react";
 import { generateLessonPlan, LessonPlanData, LessonPlanInput } from "@/services/api";
 import { Separator } from "@/components/ui/separator";
+import AdBanner from "@/components/AdBanner";
 
 const PreviewEdit = () => {
   const navigate = useNavigate();
@@ -26,7 +26,6 @@ const PreviewEdit = () => {
       setIsGenerating(true);
       
       try {
-        // Get form data from localStorage
         const formDataStr = localStorage.getItem("lessonFormData");
         
         if (!formDataStr) {
@@ -37,13 +36,11 @@ const PreviewEdit = () => {
         
         const formData = JSON.parse(formDataStr) as LessonPlanInput;
         
-        // Generate lesson plan using the API
         const generatedPlan = await generateLessonPlan(formData);
         
         setLessonPlan(generatedPlan);
         setIsGenerating(false);
         
-        // Save the generated plan in localStorage
         localStorage.setItem("generatedLessonPlan", JSON.stringify(generatedPlan));
         
       } catch (error) {
@@ -101,10 +98,8 @@ const PreviewEdit = () => {
   const handleSaveAndContinue = () => {
     if (!lessonPlan) return;
     
-    // Save updated lesson plan to localStorage
     localStorage.setItem("generatedLessonPlan", JSON.stringify(lessonPlan));
     
-    // Navigate to PDF view
     navigate("/pdf");
   };
   
@@ -506,6 +501,8 @@ const PreviewEdit = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-gray-50 to-gray-100 p-4">
+      <AdBanner className="mx-auto max-w-5xl mb-6" />
+      
       <div className="mx-auto w-full max-w-6xl px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <Button
@@ -585,6 +582,8 @@ const PreviewEdit = () => {
           )}
         </motion.div>
       </div>
+      
+      <AdBanner className="mx-auto max-w-5xl mt-6" />
     </div>
   );
 };

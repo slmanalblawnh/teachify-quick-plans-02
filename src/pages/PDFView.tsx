@@ -9,6 +9,7 @@ import { LessonPlanData } from "@/services/api";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Slider } from "@/components/ui/slider";
+import AdBanner from "@/components/AdBanner";
 
 const PDFView = () => {
   const navigate = useNavigate();
@@ -18,7 +19,6 @@ const PDFView = () => {
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Get lesson plan data from localStorage
     const lessonPlanStr = localStorage.getItem("generatedLessonPlan");
     
     if (!lessonPlanStr) {
@@ -36,20 +36,16 @@ const PDFView = () => {
     setIsGeneratingPDF(true);
     
     try {
-      // Add a temporary class to the container before capturing
-      // This ensures proper styling during capture
       pdfRef.current.classList.add("generating-pdf");
       
-      // Improved configuration for html2canvas
       const canvas = await html2canvas(pdfRef.current, {
-        scale: 2, // Higher scale for better quality
+        scale: 2,
         useCORS: true,
         logging: false,
         allowTaint: true,
-        windowWidth: 1200, // Set a fixed width to ensure consistency
-        windowHeight: 1600, // Ensure enough height
+        windowWidth: 1200,
+        windowHeight: 1600,
         onclone: (clonedDoc) => {
-          // Ensure the cloned document has proper styling
           const clonedElement = clonedDoc.getElementById(pdfRef.current?.id || '');
           if (clonedElement) {
             clonedElement.style.width = "1100px";
@@ -59,37 +55,27 @@ const PDFView = () => {
         }
       });
       
-      // Remove temporary class
       pdfRef.current.classList.remove("generating-pdf");
       
       const imgData = canvas.toDataURL("image/png");
       
-      // Create PDF in landscape orientation with proper dimensions
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "mm",
-        format: "a4", // Using standard A4 format
+        format: "a4",
       });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      // Calculate image dimensions to fit the PDF properly
       const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      // If content is taller than page, we may need to add additional pages
       if (imgHeight > pdfHeight) {
-        // Add first page
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight, '', 'FAST');
-        
-        // Calculate number of pages needed
         const pageCount = Math.ceil(imgHeight / pdfHeight);
-        
-        // Add additional pages if needed
         for (let i = 1; i < pageCount; i++) {
           pdf.addPage();
-          // Position the image negatively to show the appropriate portion on each page
           pdf.addImage(
             imgData, 
             "PNG", 
@@ -102,16 +88,13 @@ const PDFView = () => {
           );
         }
       } else {
-        // Content fits on a single page
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight, '', 'FAST');
       }
       
-      // Add information footer
       pdf.setFontSize(8);
       pdf.setTextColor(100, 100, 100);
       pdf.text("خطة درس - تم إنشاؤها بواسطة تطبيق إعداد خطط الدروس", 10, pdfHeight - 5);
       
-      // Download PDF with the lesson title
       pdf.save(`خطة درس - ${lessonPlan?.lessonTitle || "جديد"}.pdf`);
       
       toast.success("تم إنشاء ملف PDF بنجاح");
@@ -174,6 +157,8 @@ const PDFView = () => {
             </Button>
           </div>
         </div>
+        
+        <AdBanner className="mb-4 print:hidden" />
         
         <div className="flex items-center justify-between mb-4 print:hidden">
           <div className="flex items-center gap-2">
@@ -402,6 +387,8 @@ const PDFView = () => {
               </div>
             </CardContent>
           </Card>
+          
+          <AdBanner className="mt-4 print:hidden" />
           
           <div className="mt-6 text-center print:hidden">
             <p className="text-sm text-gray-500 mb-4">

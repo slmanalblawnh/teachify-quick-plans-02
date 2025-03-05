@@ -8,6 +8,7 @@ import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
 import FormDatePicker from "@/components/FormDatePicker";
 import GenerateButton from "@/components/GenerateButton";
+import AdBanner from "@/components/AdBanner";
 import { LessonPlanInput, subjects, grades } from "@/services/api";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,8 @@ const LessonForm = () => {
           العودة
         </Button>
         
+        <AdBanner className="mb-6" />
+        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -180,6 +183,8 @@ const LessonForm = () => {
             </CardContent>
           </Card>
         </motion.div>
+        
+        <AdBanner className="mt-6" />
       </div>
     </div>
   );
