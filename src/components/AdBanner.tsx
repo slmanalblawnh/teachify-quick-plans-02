@@ -9,6 +9,9 @@ interface AdBannerProps {
   printHidden?: boolean;
   width?: string;
   height?: string;
+  fallbackBgColor?: string;
+  fallbackText?: string;
+  showFallback?: boolean;
 }
 
 const AdBanner = ({ 
@@ -18,13 +21,17 @@ const AdBanner = ({
   responsive = true,
   printHidden = true,
   width = "100%",
-  height = "280px"
+  height = "280px",
+  fallbackBgColor = "#f9f9f9",
+  fallbackText = "مساحة إعلانية",
+  showFallback = true
 }: AdBannerProps) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
   const [isAdLoaded, setIsAdLoaded] = useState(false);
   const [adAttempted, setAdAttempted] = useState(false);
   const [adClient] = useState("ca-pub-6062398972709628");
   const [adError, setAdError] = useState(false);
+  const [adBlockerDetected, setAdBlockerDetected] = useState(false);
 
   useEffect(() => {
     // Only run once
@@ -114,6 +121,11 @@ const AdBanner = ({
           if (test.parentNode) {
             test.parentNode.removeChild(test);
           }
+          
+          if (isBlocked) {
+            setAdBlockerDetected(true);
+          }
+          
           resolve(isBlocked);
         }, 100);
       });
@@ -206,6 +218,43 @@ const AdBanner = ({
     };
   }, [adAttempted, adClient, format, height, responsive, slot, width]);
 
+  // Enhanced fallback display
+  const renderFallback = () => {
+    if (!showFallback) return null;
+    
+    return (
+      <div 
+        className="flex flex-col items-center justify-center w-full h-full p-4 rounded-md"
+        style={{ backgroundColor: fallbackBgColor }}
+      >
+        <div className="text-gray-500 mb-2 text-sm font-medium flex items-center justify-center">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className="mr-2"
+          >
+            <rect width="18" height="12" x="3" y="6" rx="2" />
+            <path d="M3 10h18" />
+          </svg>
+          {fallbackText}
+        </div>
+        
+        {adBlockerDetected && (
+          <div className="text-amber-500 text-xs text-center max-w-[250px]">
+            تم اكتشاف مانع إعلانات. يرجى تعطيله لدعم المحتوى المجاني.
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div 
       ref={adContainerRef} 
@@ -219,15 +268,12 @@ const AdBanner = ({
         margin: '10px auto',
         position: 'relative',
         border: adError ? '1px dashed #f0f0f0' : 'none',
+        borderRadius: '8px',
       }}
       aria-label="إعلان"
       data-ad-status={isAdLoaded ? "loaded" : "loading"}
     >
-      {adError && (
-        <div className="flex items-center justify-center h-full opacity-50 text-sm">
-          مساحة إعلانية
-        </div>
-      )}
+      {(adError || adBlockerDetected) && renderFallback()}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -27,7 +26,6 @@ const LessonForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Update date when selectedDate changes
   useEffect(() => {
     if (selectedDate) {
       setFormState((prev) => ({
@@ -40,7 +38,6 @@ const LessonForm = () => {
   const handleInputChange = (field: keyof LessonPlanInput, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
     
-    // Clear error for this field if it exists
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -74,10 +71,8 @@ const LessonForm = () => {
     setIsLoading(true);
     
     try {
-      // Store form data in localStorage
       localStorage.setItem("lessonFormData", JSON.stringify(formState));
       
-      // Navigate to preview page
       setTimeout(() => {
         navigate("/preview");
         setIsLoading(false);
@@ -101,7 +96,13 @@ const LessonForm = () => {
           العودة
         </Button>
         
-        <AdBanner className="mb-6" />
+        <AdBanner 
+          className="mb-6" 
+          fallbackBgColor="#f5f5f5" 
+          fallbackText="مساحة إعلانية" 
+          showFallback={true}
+          height="100px"
+        />
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -184,7 +185,13 @@ const LessonForm = () => {
           </Card>
         </motion.div>
         
-        <AdBanner className="mt-6" />
+        <AdBanner 
+          className="mt-6" 
+          fallbackBgColor="#f5f5f5" 
+          fallbackText="مساحة إعلانية" 
+          showFallback={true}
+          height="100px"
+        />
       </div>
     </div>
   );
