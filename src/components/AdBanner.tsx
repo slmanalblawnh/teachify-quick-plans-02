@@ -23,25 +23,39 @@ const AdBanner = ({
   const adContainerRef = useRef<HTMLDivElement>(null);
   const [isAdLoaded, setIsAdLoaded] = useState(false);
   const [adAttempted, setAdAttempted] = useState(false);
+  const [adClient] = useState("ca-pub-6062398972709628");
 
   useEffect(() => {
     // Only run once
     if (adAttempted) return;
     setAdAttempted(true);
 
+    // Clear any existing ads first
+    if (adContainerRef.current) {
+      const existingAds = adContainerRef.current.querySelectorAll('ins.adsbygoogle');
+      existingAds.forEach(ad => {
+        if (ad.parentNode) {
+          ad.parentNode.removeChild(ad);
+        }
+      });
+    }
+
     const loadAdSenseScript = () => {
       return new Promise<void>((resolve) => {
         // Check if script already exists
-        if (document.querySelector(
-          'script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6062398972709628"]'
-        )) {
+        const existingScript = document.querySelector(
+          `script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adClient}"]`
+        );
+        
+        if (existingScript) {
+          console.log("AdSense script already exists");
           resolve();
           return;
         }
         
         const adScript = document.createElement('script');
         adScript.async = true;
-        adScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6062398972709628";
+        adScript.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adClient}`;
         adScript.crossOrigin = "anonymous";
         adScript.onload = () => {
           console.log("AdSense script loaded successfully");
@@ -55,31 +69,58 @@ const AdBanner = ({
       });
     };
 
+    const createAdElement = () => {
+      if (!adContainerRef.current) return null;
+      
+      // Create a new ins element
+      const insElement = document.createElement('ins');
+      insElement.className = `adsbygoogle ${responsive ? 'w-full' : ''}`;
+      insElement.style.display = 'block';
+      insElement.style.minHeight = height;
+      insElement.style.width = width;
+      insElement.style.backgroundColor = '#f0f0f0';
+      insElement.style.transition = 'background-color 0.3s';
+      insElement.setAttribute('data-ad-client', adClient);
+      insElement.setAttribute('data-ad-slot', slot);
+      insElement.setAttribute('data-ad-format', format);
+      insElement.setAttribute('data-full-width-responsive', responsive ? 'true' : 'false');
+      
+      // Append to container
+      adContainerRef.current.appendChild(insElement);
+      return insElement;
+    };
+
     const initializeAd = () => {
       if (!adContainerRef.current) return;
       
       // Make sure container has dimensions
       if (adContainerRef.current.clientWidth === 0) {
-        console.warn("Ad container has no width, setting minimum width");
+        console.log("Setting minimum width for ad container");
         adContainerRef.current.style.minWidth = "300px";
       }
 
-      // Find the ins element
-      const adElement = adContainerRef.current.querySelector('.adsbygoogle');
-      if (!adElement) {
-        console.error("Ad element not found");
-        return;
-      }
+      // Create the ad element
+      createAdElement();
 
       try {
-        // Push the ad
+        // Check if adsbygoogle is available
         if (window.adsbygoogle) {
+          console.log("Pushing ad to adsbygoogle");
           window.adsbygoogle = window.adsbygoogle || [];
           window.adsbygoogle.push({});
           setIsAdLoaded(true);
-          console.log("Ad pushed to adsbygoogle");
         } else {
-          console.warn("adsbygoogle not available");
+          console.warn("adsbygoogle not available, will retry");
+          // If adsbygoogle isn't available, wait a bit and try again
+          setTimeout(() => {
+            if (window.adsbygoogle) {
+              console.log("Retrying: Pushing ad to adsbygoogle");
+              window.adsbygoogle.push({});
+              setIsAdLoaded(true);
+            } else {
+              console.error("adsbygoogle still not available after retry");
+            }
+          }, 1000);
         }
       } catch (error) {
         console.error("Error initializing ad:", error);
@@ -89,8 +130,8 @@ const AdBanner = ({
     const loadAd = async () => {
       try {
         await loadAdSenseScript();
-        // Give some time for AdSense to initialize
-        setTimeout(initializeAd, 300);
+        // Use a longer timeout to ensure AdSense is fully initialized
+        setTimeout(initializeAd, 500);
       } catch (error) {
         console.error("Error in ad loading process:", error);
       }
@@ -101,7 +142,7 @@ const AdBanner = ({
     return () => {
       // Cleanup when component unmounts
     };
-  }, [adAttempted]);
+  }, [adAttempted, adClient, format, height, responsive, slot, width]);
 
   return (
     <div 
@@ -111,24 +152,12 @@ const AdBanner = ({
         minHeight: height, 
         width: width, 
         overflow: 'hidden',
-        display: 'block'
+        display: 'block',
+        margin: '10px auto',
+        position: 'relative'
       }}
-    >
-      <ins
-        className={`adsbygoogle ${responsive ? 'w-full' : ''}`}
-        style={{ 
-          display: 'block', 
-          minHeight: height,
-          width: width,
-          backgroundColor: isAdLoaded ? 'transparent' : '#f0f0f0',
-          transition: 'background-color 0.3s'
-        }}
-        data-ad-client="ca-pub-6062398972709628"
-        data-ad-slot={slot}
-        data-ad-format={format}
-        data-full-width-responsive={responsive ? "true" : "false"}
-      />
-    </div>
+      aria-label="إعلان"
+    />
   );
 };
 
