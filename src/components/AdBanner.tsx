@@ -12,7 +12,7 @@ interface AdBannerProps {
 }
 
 const AdBanner = ({ 
-  slot = "4748618583", 
+  slot = "9507751550", 
   format = "auto", 
   className = "", 
   responsive = true,
