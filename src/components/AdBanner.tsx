@@ -22,58 +22,97 @@ const AdBanner = ({
 }: AdBannerProps) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
   const [isAdLoaded, setIsAdLoaded] = useState(false);
+  const [adAttempted, setAdAttempted] = useState(false);
 
   useEffect(() => {
-    // Ensure the ad container has dimensions before loading ads
-    if (adContainerRef.current && adContainerRef.current.clientWidth > 0) {
-      // Ensure this runs only in the browser
-      if (typeof window !== 'undefined') {
-        try {
-          // Ensure the AdSense script is loaded
-          const loadAdSenseScript = () => {
-            if (!document.querySelector(
-              'script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6062398972709628"]'
-            )) {
-              const adScript = document.createElement('script');
-              adScript.async = true;
-              adScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6062398972709628";
-              adScript.crossOrigin = "anonymous";
-              document.head.appendChild(adScript);
-            }
-          };
+    // Only run once
+    if (adAttempted) return;
+    setAdAttempted(true);
 
-          loadAdSenseScript();
-          
-          // Add a small delay to ensure the script has time to initialize
-          setTimeout(() => {
-            // Initialize the ad
-            if (window.adsbygoogle) {
-              window.adsbygoogle = window.adsbygoogle || [];
-              window.adsbygoogle.push({});
-              setIsAdLoaded(true);
-              console.log("تم محاولة تحميل الإعلان بنجاح");
-            } else {
-              console.warn("لم يتم العثور على adsbygoogle");
-            }
-          }, 200);
-        } catch (error) {
-          console.error("خطأ في تحميل الإعلان:", error);
+    const loadAdSenseScript = () => {
+      return new Promise<void>((resolve) => {
+        // Check if script already exists
+        if (document.querySelector(
+          'script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6062398972709628"]'
+        )) {
+          resolve();
+          return;
         }
+        
+        const adScript = document.createElement('script');
+        adScript.async = true;
+        adScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6062398972709628";
+        adScript.crossOrigin = "anonymous";
+        adScript.onload = () => {
+          console.log("AdSense script loaded successfully");
+          resolve();
+        };
+        adScript.onerror = (e) => {
+          console.error("Error loading AdSense script:", e);
+          resolve(); // Resolve anyway to continue the flow
+        };
+        document.head.appendChild(adScript);
+      });
+    };
+
+    const initializeAd = () => {
+      if (!adContainerRef.current) return;
+      
+      // Make sure container has dimensions
+      if (adContainerRef.current.clientWidth === 0) {
+        console.warn("Ad container has no width, setting minimum width");
+        adContainerRef.current.style.minWidth = "300px";
       }
-    } else {
-      console.warn("حاوية الإعلان ليس لها أبعاد محددة");
-    }
-    
+
+      // Find the ins element
+      const adElement = adContainerRef.current.querySelector('.adsbygoogle');
+      if (!adElement) {
+        console.error("Ad element not found");
+        return;
+      }
+
+      try {
+        // Push the ad
+        if (window.adsbygoogle) {
+          window.adsbygoogle = window.adsbygoogle || [];
+          window.adsbygoogle.push({});
+          setIsAdLoaded(true);
+          console.log("Ad pushed to adsbygoogle");
+        } else {
+          console.warn("adsbygoogle not available");
+        }
+      } catch (error) {
+        console.error("Error initializing ad:", error);
+      }
+    };
+
+    const loadAd = async () => {
+      try {
+        await loadAdSenseScript();
+        // Give some time for AdSense to initialize
+        setTimeout(initializeAd, 300);
+      } catch (error) {
+        console.error("Error in ad loading process:", error);
+      }
+    };
+
+    loadAd();
+
     return () => {
       // Cleanup when component unmounts
     };
-  }, []);
+  }, [adAttempted]);
 
   return (
     <div 
       ref={adContainerRef} 
       className={`ad-container ${printHidden ? 'print:hidden' : ''} ${className}`}
-      style={{ minHeight: height, width: width }}
+      style={{ 
+        minHeight: height, 
+        width: width, 
+        overflow: 'hidden',
+        display: 'block'
+      }}
     >
       <ins
         className={`adsbygoogle ${responsive ? 'w-full' : ''}`}
