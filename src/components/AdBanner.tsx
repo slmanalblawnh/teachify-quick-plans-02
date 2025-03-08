@@ -29,154 +29,74 @@ const AdBanner = ({
   const adContainerRef = useRef<HTMLDivElement>(null);
   const [isAdLoaded, setIsAdLoaded] = useState(false);
   const [adClient] = useState("ca-pub-6062398972709628");
-  const [showFallbackState, setShowFallbackState] = useState(false);
-  const [attemptingToLoadAd, setAttemptingToLoadAd] = useState(false);
 
   useEffect(() => {
-    // Prevent multiple initialization attempts
-    if (attemptingToLoadAd) return;
-    setAttemptingToLoadAd(true);
-    
-    const loadAd = async () => {
+    // Direct ad insertion approach
+    const loadAd = () => {
+      if (!adContainerRef.current) return;
+      
+      // Clear any existing content
+      adContainerRef.current.innerHTML = '';
+      
       try {
-        // Ensure the AdSense script is loaded
-        await ensureAdSenseScriptLoaded();
+        // Create the ins element
+        const insElement = document.createElement('ins');
+        insElement.className = 'adsbygoogle';
+        insElement.style.display = 'block';
+        insElement.style.width = width;
+        insElement.style.height = height;
+        insElement.setAttribute('data-ad-client', adClient);
+        insElement.setAttribute('data-ad-slot', slot);
+        insElement.setAttribute('data-ad-format', format);
         
-        // Create the ad element
-        createAdElement();
+        if (responsive) {
+          insElement.setAttribute('data-full-width-responsive', 'true');
+        }
         
-        // Push the ad
-        pushAd();
+        // Add to DOM
+        adContainerRef.current.appendChild(insElement);
+        
+        // Force push the ad
+        if (window.adsbygoogle) {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          console.log("Ad push attempted");
+          setIsAdLoaded(true);
+        } else {
+          // If adsbygoogle isn't available yet, wait for it
+          const waitForAdsense = setInterval(() => {
+            if (window.adsbygoogle) {
+              (window.adsbygoogle = window.adsbygoogle || []).push({});
+              console.log("Ad push attempted after waiting");
+              setIsAdLoaded(true);
+              clearInterval(waitForAdsense);
+            }
+          }, 300);
+          
+          // Clear interval after 5 seconds if not loaded
+          setTimeout(() => clearInterval(waitForAdsense), 5000);
+        }
       } catch (error) {
-        console.error("Error loading ad:", error);
-        setShowFallbackState(true);
+        console.log("Ad loading error:", error);
       }
     };
-    
-    // Start loading with a delay
-    const timer = setTimeout(loadAd, 1000);
+
+    // Initial delay before loading ad
+    const timer = setTimeout(() => {
+      loadAd();
+      
+      // Retry after 2 seconds if not loaded
+      setTimeout(() => {
+        if (!isAdLoaded && adContainerRef.current) {
+          console.log("Retrying ad load");
+          loadAd();
+        }
+      }, 2000);
+    }, 1000);
     
     return () => {
       clearTimeout(timer);
     };
-  }, [attemptingToLoadAd, adClient, format, height, responsive, slot, width]);
-
-  // Create the ad element
-  const createAdElement = () => {
-    if (!adContainerRef.current) return;
-    
-    // Clear container before creating new ad
-    adContainerRef.current.innerHTML = '';
-    
-    // Create the ins element for AdSense
-    const insElement = document.createElement('ins');
-    insElement.className = `adsbygoogle`;
-    insElement.style.display = 'block';
-    insElement.style.width = width;
-    insElement.style.height = height;
-    insElement.style.transition = 'opacity 0.3s ease';
-    insElement.setAttribute('data-ad-client', adClient);
-    insElement.setAttribute('data-ad-slot', slot);
-    insElement.setAttribute('data-ad-format', format);
-    
-    if (responsive) {
-      insElement.setAttribute('data-full-width-responsive', 'true');
-    }
-    
-    // Append to container
-    adContainerRef.current.appendChild(insElement);
-    return insElement;
-  };
-  
-  // Make sure AdSense script is loaded
-  const ensureAdSenseScriptLoaded = () => {
-    return new Promise<void>((resolve) => {
-      // Check if AdSense is already loaded
-      if (typeof window.adsbygoogle !== 'undefined') {
-        console.log("AdSense already loaded");
-        resolve();
-        return;
-      }
-      
-      // Load AdSense script
-      const script = document.createElement('script');
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adClient}`;
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      
-      script.onload = () => {
-        console.log("AdSense script loaded successfully");
-        resolve();
-      };
-      
-      script.onerror = () => {
-        console.log("AdSense script failed to load, but continuing");
-        resolve(); // Resolve anyway to try the ad
-      };
-      
-      document.head.appendChild(script);
-    });
-  };
-  
-  // Push ad to AdSense
-  const pushAd = () => {
-    try {
-      if (window.adsbygoogle) {
-        console.log("Pushing ad to AdSense");
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-        
-        // Set a timeout to check if ad loaded successfully
-        setTimeout(() => {
-          const adElement = adContainerRef.current?.querySelector('ins.adsbygoogle');
-          if (adElement && adElement.innerHTML.trim() !== '') {
-            setIsAdLoaded(true);
-            setShowFallbackState(false);
-          } else {
-            // If ad doesn't seem to have content, show fallback
-            setShowFallbackState(true);
-          }
-        }, 2000);
-        
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error pushing ad:", error);
-      setShowFallbackState(true);
-      return false;
-    }
-  };
-
-  // Render fallback content
-  const renderFallback = () => {
-    if (!showFallback) return null;
-    
-    return (
-      <div 
-        className="flex items-center justify-center w-full h-full p-4 rounded-md"
-        style={{ backgroundColor: fallbackBgColor }}
-      >
-        <div className="text-gray-500 text-sm font-medium flex items-center justify-center">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="20" 
-            height="20" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            className="mr-2"
-          >
-            <rect width="18" height="12" x="3" y="6" rx="2" />
-            <path d="M3 10h18" />
-          </svg>
-          {fallbackText}
-        </div>
-      </div>
-    );
-  };
+  }, [adClient, format, height, isAdLoaded, responsive, slot, width]);
 
   return (
     <div 
@@ -193,10 +113,7 @@ const AdBanner = ({
         borderRadius: '8px',
       }}
       aria-label="إعلان"
-      data-ad-status={isAdLoaded ? "loaded" : "loading"}
-    >
-      {showFallbackState && renderFallback()}
-    </div>
+    />
   );
 };
 
