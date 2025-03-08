@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 
 interface AdBannerProps {
@@ -32,6 +31,7 @@ const AdBanner = ({
   const [adClient] = useState("ca-pub-6062398972709628");
   const [adError, setAdError] = useState(false);
   const [adBlockerDetected, setAdBlockerDetected] = useState(false);
+  const [loadRetries, setLoadRetries] = useState(0);
 
   useEffect(() => {
     // Only run once
@@ -48,18 +48,19 @@ const AdBanner = ({
       });
     }
 
+    // Check if AdSense script is already on the page
+    const isAdSenseLoaded = () => {
+      return typeof window.adsbygoogle !== 'undefined';
+    };
+
     const loadAdSenseScript = () => {
       return new Promise<void>((resolve) => {
-        // Remove any existing AdSense scripts first to avoid conflicts
-        const existingScripts = document.querySelectorAll(
-          `script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]`
-        );
-        
-        existingScripts.forEach(script => {
-          if (script.parentNode) {
-            script.parentNode.removeChild(script);
-          }
-        });
+        // Don't reload the script if it's already loaded
+        if (isAdSenseLoaded()) {
+          console.log("AdSense script already loaded");
+          resolve();
+          return;
+        }
         
         // Create and add a new script
         const adScript = document.createElement('script');
@@ -108,6 +109,12 @@ const AdBanner = ({
 
     const checkAdBlocker = () => {
       return new Promise<boolean>((resolve) => {
+        // Check if adsbygoogle is undefined or blocked
+        if (window.adsbygoogle === undefined) {
+          resolve(true);
+          return;
+        }
+        
         const test = document.createElement('div');
         test.innerHTML = '&nbsp;';
         test.className = 'adsbox';
@@ -131,6 +138,31 @@ const AdBanner = ({
       });
     };
 
+    const pushAd = () => {
+      try {
+        // Check if adsbygoogle is available
+        if (window.adsbygoogle) {
+          console.log("Pushing ad to adsbygoogle");
+          
+          // Force array initialization
+          window.adsbygoogle = window.adsbygoogle || [];
+          
+          // Push the ad
+          window.adsbygoogle.push({});
+          
+          // Mark as loaded
+          setIsAdLoaded(true);
+          
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Error pushing ad:", error);
+        setAdError(true);
+        return false;
+      }
+    };
+
     const initializeAd = async () => {
       if (!adContainerRef.current) return;
       
@@ -151,40 +183,17 @@ const AdBanner = ({
       // Create the ad element
       createAdElement();
 
-      const pushAd = () => {
-        try {
-          // Check if adsbygoogle is available
-          if (window.adsbygoogle) {
-            console.log("Pushing ad to adsbygoogle");
-            
-            // Force array initialization
-            window.adsbygoogle = window.adsbygoogle || [];
-            
-            // Push the ad
-            window.adsbygoogle.push({});
-            
-            // Mark as loaded
-            setIsAdLoaded(true);
-            
-            return true;
-          }
-          return false;
-        } catch (error) {
-          console.error("Error pushing ad:", error);
-          setAdError(true);
-          return false;
-        }
-      };
-
-      // Try immediately
+      // Try to push the ad
       if (!pushAd()) {
         console.log("Initial push failed, retrying...");
         
         // Retry a few times with increasing delays
         let attempts = 0;
-        const maxAttempts = 3;
+        const maxAttempts = 5; // Increased from 3 to 5
         const retryInterval = setInterval(() => {
           attempts++;
+          setLoadRetries(attempts);
+          
           if (attempts > maxAttempts) {
             clearInterval(retryInterval);
             setAdError(true);
@@ -193,25 +202,34 @@ const AdBanner = ({
           }
           
           console.log(`Retry attempt ${attempts}/${maxAttempts}`);
+          // Recreate ad element on each retry
+          createAdElement();
           if (pushAd()) {
             clearInterval(retryInterval);
           }
-        }, 1000);
+        }, 2000); // Increased from 1000 to 2000ms
       }
     };
 
     const loadAd = async () => {
       try {
-        await loadAdSenseScript();
-        // Use a longer timeout to ensure AdSense is fully initialized
-        setTimeout(initializeAd, 1000);
+        // First try to use existing AdSense if available
+        if (isAdSenseLoaded()) {
+          initializeAd();
+        } else {
+          // Otherwise load the script first
+          await loadAdSenseScript();
+          // Use a longer timeout to ensure AdSense is fully initialized
+          setTimeout(initializeAd, 2000); // Increased from 1000 to 2000ms
+        }
       } catch (error) {
         console.error("Error in ad loading process:", error);
         setAdError(true);
       }
     };
 
-    loadAd();
+    // Start the ad loading process
+    setTimeout(loadAd, 500); // Adding a small delay before starting to improve reliability
 
     return () => {
       // Cleanup function
@@ -272,6 +290,7 @@ const AdBanner = ({
       }}
       aria-label="إعلان"
       data-ad-status={isAdLoaded ? "loaded" : "loading"}
+      data-ad-retry={loadRetries}
     >
       {(adError || adBlockerDetected) && renderFallback()}
     </div>
