@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface AdBannerProps {
   slot?: string;
@@ -9,9 +9,6 @@ interface AdBannerProps {
   printHidden?: boolean;
   width?: string;
   height?: string;
-  fallbackBgColor?: string;
-  fallbackText?: string;
-  showFallback?: boolean;
 }
 
 const AdBanner = ({ 
@@ -22,14 +19,10 @@ const AdBanner = ({
   printHidden = true,
   width = "100%",
   height = "280px",
-  fallbackBgColor = "#f9f9f9",
-  fallbackText = "مساحة إعلانية",
-  showFallback = true
 }: AdBannerProps) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
-  const [isAdLoaded, setIsAdLoaded] = useState(false);
   const [adClient] = useState("ca-pub-6062398972709628");
-
+  
   useEffect(() => {
     // Direct ad insertion approach
     const loadAd = () => {
@@ -56,47 +49,32 @@ const AdBanner = ({
         // Add to DOM
         adContainerRef.current.appendChild(insElement);
         
-        // Force push the ad
-        if (window.adsbygoogle) {
+        // Push the ad
+        try {
           (window.adsbygoogle = window.adsbygoogle || []).push({});
-          console.log("Ad push attempted");
-          setIsAdLoaded(true);
-        } else {
-          // If adsbygoogle isn't available yet, wait for it
-          const waitForAdsense = setInterval(() => {
-            if (window.adsbygoogle) {
-              (window.adsbygoogle = window.adsbygoogle || []).push({});
-              console.log("Ad push attempted after waiting");
-              setIsAdLoaded(true);
-              clearInterval(waitForAdsense);
-            }
-          }, 300);
-          
-          // Clear interval after 5 seconds if not loaded
-          setTimeout(() => clearInterval(waitForAdsense), 5000);
+          console.log("Ad push executed");
+        } catch (adError) {
+          console.error("Ad push error:", adError);
         }
       } catch (error) {
-        console.log("Ad loading error:", error);
+        console.error("Ad setup error:", error);
       }
     };
 
-    // Initial delay before loading ad
-    const timer = setTimeout(() => {
+    // Initial load with a slight delay
+    const timer = setTimeout(loadAd, 1000);
+    
+    // Retry after 3 seconds if needed
+    const retryTimer = setTimeout(() => {
+      console.log("Retrying ad load");
       loadAd();
-      
-      // Retry after 2 seconds if not loaded
-      setTimeout(() => {
-        if (!isAdLoaded && adContainerRef.current) {
-          console.log("Retrying ad load");
-          loadAd();
-        }
-      }, 2000);
-    }, 1000);
+    }, 3000);
     
     return () => {
       clearTimeout(timer);
+      clearTimeout(retryTimer);
     };
-  }, [adClient, format, height, isAdLoaded, responsive, slot, width]);
+  }, [adClient, format, height, responsive, slot, width]);
 
   return (
     <div 

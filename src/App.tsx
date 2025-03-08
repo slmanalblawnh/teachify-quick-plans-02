@@ -18,7 +18,7 @@ const App = () => {
   // Initialize AdSense
   useEffect(() => {
     try {
-      if (window.adsbygoogle && !window.adsbygoogle.loaded) {
+      if (window.adsbygoogle) {
         window.adsbygoogle.push({
           google_ad_client: "ca-pub-6062398972709628",
           enable_page_level_ads: true
