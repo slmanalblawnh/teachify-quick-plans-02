@@ -27,7 +27,7 @@ const AdBanner = ({
   showFallback = false
 }: AdBannerProps) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
-  const [adClient] = useState("ca-pub-6062398972709628");
+  const [adClient] = useState("ca-pub-3448600619690558");
   
   useEffect(() => {
     // Direct ad insertion approach
