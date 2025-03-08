@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface AdBannerProps {
   slot?: string;
@@ -9,6 +9,9 @@ interface AdBannerProps {
   printHidden?: boolean;
   width?: string;
   height?: string;
+  fallbackBgColor?: string;
+  fallbackText?: string;
+  showFallback?: boolean;
 }
 
 const AdBanner = ({ 
@@ -19,6 +22,9 @@ const AdBanner = ({
   printHidden = true,
   width = "100%",
   height = "280px",
+  fallbackBgColor = "#f9f9f9",
+  fallbackText = "مساحة إعلانية",
+  showFallback = false
 }: AdBannerProps) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
   const [adClient] = useState("ca-pub-6062398972709628");
@@ -76,6 +82,17 @@ const AdBanner = ({
     };
   }, [adClient, format, height, responsive, slot, width]);
 
+  // Add fallback content styling if showFallback is enabled
+  const fallbackStyle = showFallback ? {
+    backgroundColor: fallbackBgColor,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#666',
+    fontStyle: 'italic',
+    border: '1px dashed #ccc'
+  } : {};
+
   return (
     <div 
       ref={adContainerRef} 
@@ -89,9 +106,12 @@ const AdBanner = ({
         margin: '10px auto',
         position: 'relative',
         borderRadius: '8px',
+        ...fallbackStyle
       }}
       aria-label="إعلان"
-    />
+    >
+      {showFallback && fallbackText}
+    </div>
   );
 };
 
