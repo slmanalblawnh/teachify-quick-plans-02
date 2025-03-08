@@ -73,7 +73,6 @@ const AdBanner = ({
         };
         adScript.onerror = (e) => {
           console.error("Error loading AdSense script:", e);
-          setAdError(true);
           resolve(); // Resolve anyway to continue the flow
         };
         document.head.appendChild(adScript);
@@ -109,32 +108,9 @@ const AdBanner = ({
 
     const checkAdBlocker = () => {
       return new Promise<boolean>((resolve) => {
-        // Check if adsbygoogle is undefined or blocked
-        if (window.adsbygoogle === undefined) {
-          resolve(true);
-          return;
-        }
-        
-        const test = document.createElement('div');
-        test.innerHTML = '&nbsp;';
-        test.className = 'adsbox';
-        test.style.position = 'absolute';
-        test.style.fontSize = '0px';
-        test.style.opacity = '0';
-        document.body.appendChild(test);
-        
-        setTimeout(() => {
-          const isBlocked = test.offsetHeight === 0;
-          if (test.parentNode) {
-            test.parentNode.removeChild(test);
-          }
-          
-          if (isBlocked) {
-            setAdBlockerDetected(true);
-          }
-          
-          resolve(isBlocked);
-        }, 100);
+        // Always resolve with false to bypass ad blocker detection
+        setAdBlockerDetected(false);
+        resolve(false);
       });
     };
 
@@ -158,7 +134,6 @@ const AdBanner = ({
         return false;
       } catch (error) {
         console.error("Error pushing ad:", error);
-        setAdError(true);
         return false;
       }
     };
@@ -166,14 +141,7 @@ const AdBanner = ({
     const initializeAd = async () => {
       if (!adContainerRef.current) return;
       
-      // Check for ad blockers
-      const adBlocked = await checkAdBlocker();
-      if (adBlocked) {
-        console.warn("Ad blocker detected");
-        setAdError(true);
-        return;
-      }
-      
+      // Skip ad blocker check - Always proceed
       // Make sure container has dimensions
       if (adContainerRef.current.clientWidth === 0) {
         console.log("Setting minimum width for ad container");
@@ -189,7 +157,7 @@ const AdBanner = ({
         
         // Retry a few times with increasing delays
         let attempts = 0;
-        const maxAttempts = 5; // Increased from 3 to 5
+        const maxAttempts = 10; // Increased retry attempts
         const retryInterval = setInterval(() => {
           attempts++;
           setLoadRetries(attempts);
@@ -207,7 +175,7 @@ const AdBanner = ({
           if (pushAd()) {
             clearInterval(retryInterval);
           }
-        }, 2000); // Increased from 1000 to 2000ms
+        }, 3000); // Increased delay between retries
       }
     };
 
@@ -220,16 +188,15 @@ const AdBanner = ({
           // Otherwise load the script first
           await loadAdSenseScript();
           // Use a longer timeout to ensure AdSense is fully initialized
-          setTimeout(initializeAd, 2000); // Increased from 1000 to 2000ms
+          setTimeout(initializeAd, 3000); // Increased timeout
         }
       } catch (error) {
         console.error("Error in ad loading process:", error);
-        setAdError(true);
       }
     };
 
     // Start the ad loading process
-    setTimeout(loadAd, 500); // Adding a small delay before starting to improve reliability
+    setTimeout(loadAd, 1000); // Adding a delay before starting to improve reliability
 
     return () => {
       // Cleanup function
@@ -263,12 +230,6 @@ const AdBanner = ({
           </svg>
           {fallbackText}
         </div>
-        
-        {adBlockerDetected && (
-          <div className="text-amber-500 text-xs text-center max-w-[250px]">
-            تم اكتشاف مانع إعلانات. يرجى تعطيله لدعم المحتوى المجاني.
-          </div>
-        )}
       </div>
     );
   };
@@ -292,7 +253,7 @@ const AdBanner = ({
       data-ad-status={isAdLoaded ? "loaded" : "loading"}
       data-ad-retry={loadRetries}
     >
-      {(adError || adBlockerDetected) && renderFallback()}
+      {adError && renderFallback()}
     </div>
   );
 };
