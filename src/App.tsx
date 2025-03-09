@@ -20,7 +20,7 @@ const App = () => {
     try {
       if (window.adsbygoogle) {
         window.adsbygoogle.push({
-          google_ad_client: "ca-pub-3448600619690558",
+          google_ad_client: "ca-pub-3940256099942544", // Google's test ad client
           enable_page_level_ads: true
         });
         console.log("AdSense initialization pushed");

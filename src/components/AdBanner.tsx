@@ -15,7 +15,7 @@ interface AdBannerProps {
 }
 
 const AdBanner = ({ 
-  slot = "9507751550", 
+  slot = "1234567890", 
   format = "auto", 
   className = "", 
   responsive = true,
@@ -27,7 +27,8 @@ const AdBanner = ({
   showFallback = false
 }: AdBannerProps) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
-  const [adClient] = useState("ca-pub-3448600619690558");
+  // Using Google's test ad client ID
+  const [adClient] = useState("ca-pub-3940256099942544");
   
   useEffect(() => {
     // Direct ad insertion approach
