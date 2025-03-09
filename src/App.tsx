@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
 import Index from "./pages/Index";
 import LessonForm from "./pages/LessonForm";
 import PreviewEdit from "./pages/PreviewEdit";
@@ -15,20 +14,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Initialize AdSense
-  useEffect(() => {
-    try {
-      if (window.adsbygoogle) {
-        window.adsbygoogle.push({
-          google_ad_client: "ca-pub-3940256099942544", // Google's test ad client
-          enable_page_level_ads: true
-        });
-        console.log("AdSense initialization pushed");
-      }
-    } catch (error) {
-      console.error("AdSense initialization error:", error);
-    }
-  }, []);
+  // إزالة تهيئة AdSense من هنا لأنها موجودة بالفعل في ملف index.html
 
   return (
     <QueryClientProvider client={queryClient}>

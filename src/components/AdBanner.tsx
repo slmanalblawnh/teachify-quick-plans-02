@@ -27,19 +27,19 @@ const AdBanner = ({
   showFallback = false
 }: AdBannerProps) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
-  // Using Google's test ad client ID
-  const [adClient] = useState("ca-pub-3940256099942544");
+  // استخدام معرف العميل التجريبي من Google
+  const adClient = "ca-pub-3940256099942544";
+  const [adLoaded, setAdLoaded] = useState(false);
   
   useEffect(() => {
-    // Direct ad insertion approach
     const loadAd = () => {
       if (!adContainerRef.current) return;
       
-      // Clear any existing content
+      // تنظيف المحتوى الموجود
       adContainerRef.current.innerHTML = '';
       
       try {
-        // Create the ins element
+        // إنشاء عنصر الإعلان
         const insElement = document.createElement('ins');
         insElement.className = 'adsbygoogle';
         insElement.style.display = 'block';
@@ -53,38 +53,34 @@ const AdBanner = ({
           insElement.setAttribute('data-full-width-responsive', 'true');
         }
         
-        // Add to DOM
+        // إضافة إلى DOM
         adContainerRef.current.appendChild(insElement);
         
-        // Push the ad
+        // دفع الإعلان للعرض
         try {
           (window.adsbygoogle = window.adsbygoogle || []).push({});
-          console.log("Ad push executed");
+          console.log("تم تنفيذ دفع الإعلان");
+          setAdLoaded(true);
         } catch (adError) {
-          console.error("Ad push error:", adError);
+          console.error("خطأ في دفع الإعلان:", adError);
+          setAdLoaded(false);
         }
       } catch (error) {
-        console.error("Ad setup error:", error);
+        console.error("خطأ في إعداد الإعلان:", error);
+        setAdLoaded(false);
       }
     };
 
-    // Initial load with a slight delay
+    // تحميل أولي بتأخير طفيف
     const timer = setTimeout(loadAd, 1000);
-    
-    // Retry after 3 seconds if needed
-    const retryTimer = setTimeout(() => {
-      console.log("Retrying ad load");
-      loadAd();
-    }, 3000);
     
     return () => {
       clearTimeout(timer);
-      clearTimeout(retryTimer);
     };
   }, [adClient, format, height, responsive, slot, width]);
 
-  // Add fallback content styling if showFallback is enabled
-  const fallbackStyle = showFallback ? {
+  // إضافة نمط محتوى بديل إذا تم تمكين showFallback
+  const fallbackStyle = showFallback || !adLoaded ? {
     backgroundColor: fallbackBgColor,
     display: 'flex',
     alignItems: 'center',
@@ -111,12 +107,12 @@ const AdBanner = ({
       }}
       aria-label="إعلان"
     >
-      {showFallback && fallbackText}
+      {(showFallback || !adLoaded) && fallbackText}
     </div>
   );
 };
 
-// Add TypeScript declaration for adsbygoogle
+// إضافة إعلان نوع TypeScript لـ adsbygoogle
 declare global {
   interface Window {
     adsbygoogle: any[];
