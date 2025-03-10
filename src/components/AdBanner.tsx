@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 
 interface AdBannerProps {
@@ -24,10 +23,10 @@ const AdBanner = ({
   height = "280px",
   fallbackBgColor = "#f9f9f9",
   fallbackText = "مساحة إعلانية",
-  showFallback = true // تم تغييره ليكون true بشكل افتراضي
+  showFallback = true
 }: AdBannerProps) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
-  const adClient = "ca-pub-3940256099942544"; // معرف عميل إعلانات Google التجريبي
+  const adClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || "ca-pub-3940256099942544"; // استخدم المتغير البيئي هنا
   const [adLoaded, setAdLoaded] = useState(false);
   const [adAttempted, setAdAttempted] = useState(false);
   
