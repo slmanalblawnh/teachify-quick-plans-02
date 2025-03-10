@@ -1,199 +1,233 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import FormInput from "@/components/FormInput";
-import FormSelect from "@/components/FormSelect";
-import FormDatePicker from "@/components/FormDatePicker";
-import GenerateButton from "@/components/GenerateButton";
-import AdBanner from "@/components/AdBanner";
-import { LessonPlanInput, subjects, grades } from "@/services/api";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { lessonSchema } from "../schemas/lessonSchema";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { useMutation } from "@tanstack/react-query";
+import { createLessonPlan } from "../lib/api";
+import { Loader2 } from "lucide-react";
+import AdBanner from "../components/AdBanner";
+
+type LessonSchemaType = z.infer<typeof lessonSchema>;
 
 const LessonForm = () => {
+  const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
-  const [formState, setFormState] = useState<LessonPlanInput>({
-    subject: "",
-    grade: "",
-    lessonTitle: "",
-    date: new Date().toLocaleDateString("ar-EG"),
-    teacherName: "",
+  const { toast } = useToast();
+
+  const form = useForm<LessonSchemaType>({
+    resolver: zodResolver(lessonSchema),
+    defaultValues: {
+      topic: "",
+      gradeLevel: "",
+      learningObjectives: "",
+      materials: "",
+      procedure: "",
+      assessment: "",
+      duration: "",
+    },
   });
-  
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (selectedDate) {
-      setFormState((prev) => ({
-        ...prev,
-        date: selectedDate.toLocaleDateString("ar-EG"),
-      }));
-    }
-  }, [selectedDate]);
-
-  const handleInputChange = (field: keyof LessonPlanInput, value: string) => {
-    setFormState((prev) => ({ ...prev, [field]: value }));
-    
-    if (errors[field]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
+  const { mutate, isLoading } = useMutation({
+    mutationFn: createLessonPlan,
+    onSuccess: (data) => {
+      console.log("Lesson plan created successfully", data);
+      setIsGenerating(false);
+      toast({
+        title: "تم إنشاء خطة الدرس بنجاح",
       });
-    }
-  };
+      navigate("/preview");
+    },
+    onError: (error) => {
+      console.error("Failed to create lesson plan", error);
+      setIsGenerating(false);
+      toast({
+        title: "فشل في إنشاء خطة الدرس",
+        description: "يرجى التحقق من النموذج الخاص بك والمحاولة مرة أخرى.",
+        variant: "destructive",
+      });
+    },
+  });
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formState.subject) newErrors.subject = "يرجى اختيار المادة الدراسية";
-    if (!formState.grade) newErrors.grade = "يرجى اختيار الصف الدراسي";
-    if (!formState.lessonTitle) newErrors.lessonTitle = "يرجى إدخال عنوان الدرس";
-    if (!formState.date) newErrors.date = "يرجى اختيار التاريخ";
-    if (!formState.teacherName) newErrors.teacherName = "يرجى إدخال اسم المعلم";
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      toast.error("يرجى إكمال جميع الحقول المطلوبة");
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      localStorage.setItem("lessonFormData", JSON.stringify(formState));
-      
-      setTimeout(() => {
-        navigate("/preview");
-        setIsLoading(false);
-      }, 1500);
-    } catch (error) {
-      console.error("Error generating lesson plan:", error);
-      toast.error("حدث خطأ أثناء معالجة البيانات");
-      setIsLoading(false);
-    }
+  const onSubmit = (values: LessonSchemaType) => {
+    console.log("Form values", values);
+    setIsGenerating(true);
+    mutate(values);
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-gray-50 to-gray-100 p-4">
-      <div className="mx-auto w-full max-w-4xl px-4 py-8">
-        <Button
-          variant="ghost"
-          className="mb-6 text-gray-500 hover:text-gray-700"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          العودة
-        </Button>
-        
+    <motion.div
+      className="container mx-auto px-4 py-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* إضافة شريط إعلاني تجريبي أعلى الصفحة */}
+      <AdBanner 
+        slot="1234567890" 
+        format="auto" 
+        height="100px" 
+        showFallback={true} 
+        fallbackText="إعلان تجريبي Google AdSense"
+      />
+      
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h1 className="text-2xl font-semibold mb-4">
+          إنشاء خطة درس جديدة
+        </h1>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="topic"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>عنوان الدرس</FormLabel>
+                  <FormControl>
+                    <Input placeholder="أدخل عنوان الدرس" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gradeLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>المرحلة الدراسية</FormLabel>
+                  <FormControl>
+                    <Input placeholder="أدخل المرحلة الدراسية" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="learningObjectives"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الأهداف التعليمية</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="أدخل الأهداف التعليمية"
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="materials"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>المواد والأدوات</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="أدخل المواد والأدوات اللازمة"
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="procedure"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>إجراءات التدريس</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="أدخل إجراءات التدريس بالتفصيل"
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="assessment"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>طرق التقييم</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="أدخل طرق التقييم المستخدمة"
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="duration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>المدة الزمنية</FormLabel>
+                  <FormControl>
+                    <Input placeholder="أدخل المدة الزمنية للدرس" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || isGenerating}
+            >
+              {isLoading || isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  جاري الإنشاء...
+                </>
+              ) : (
+                "إنشاء خطة الدرس"
+              )}
+            </Button>
+          </form>
+        </Form>
+      </div>
+      
+      {/* إضافة شريط إعلاني تجريبي آخر أسفل الصفحة */}
+      <div className="mt-8">
         <AdBanner 
-          className="mb-6" 
-          fallbackBgColor="#f5f5f5" 
-          fallbackText="مساحة إعلانية" 
-          showFallback={true}
-          height="100px"
-        />
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="overflow-hidden shadow-lg border-none bg-white/80 backdrop-blur-sm">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 pb-8 pt-10">
-              <CardTitle className="text-center text-2xl font-bold text-gray-800">
-                إدخال بيانات خطة الدرس
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-10 pt-10">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <FormSelect
-                    label="المادة الدراسية"
-                    id="subject"
-                    value={formState.subject}
-                    onChange={(value) => handleInputChange("subject", value)}
-                    options={subjects}
-                    required
-                    error={errors.subject}
-                  />
-                  
-                  <FormSelect
-                    label="الصف الدراسي"
-                    id="grade"
-                    value={formState.grade}
-                    onChange={(value) => handleInputChange("grade", value)}
-                    options={grades}
-                    required
-                    error={errors.grade}
-                  />
-                  
-                  <FormInput
-                    label="عنوان الدرس"
-                    id="lessonTitle"
-                    value={formState.lessonTitle}
-                    onChange={(value) => handleInputChange("lessonTitle", value)}
-                    placeholder="أدخل عنوان الدرس"
-                    required
-                    error={errors.lessonTitle}
-                  />
-                  
-                  <FormDatePicker
-                    label="التاريخ"
-                    id="date"
-                    value={selectedDate}
-                    onChange={setSelectedDate}
-                    required
-                    error={errors.date}
-                  />
-                  
-                  <FormInput
-                    label="اسم المعلم"
-                    id="teacherName"
-                    value={formState.teacherName}
-                    onChange={(value) => handleInputChange("teacherName", value)}
-                    placeholder="أدخل اسم المعلم"
-                    required
-                    error={errors.teacherName}
-                    className="md:col-span-2"
-                  />
-                </div>
-                
-                <div className="mt-8 flex justify-center">
-                  <GenerateButton
-                    type="submit"
-                    label="إنشاء خطة الدرس"
-                    loadingLabel="جاري إنشاء خطة الدرس..."
-                    isLoading={isLoading}
-                    icon={<Sparkles className="h-5 w-5" />}
-                    className="w-full max-w-md rounded-xl text-base font-medium"
-                    size="lg"
-                  />
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.div>
-        
-        <AdBanner 
-          className="mt-6" 
-          fallbackBgColor="#f5f5f5" 
-          fallbackText="مساحة إعلانية" 
-          showFallback={true}
-          height="100px"
+          slot="1234567890" 
+          format="rectangle" 
+          height="250px" 
+          showFallback={true} 
+          fallbackText="إعلان تجريبي Google AdSense (مستطيل)"
         />
       </div>
-    </div>
+    </motion.div>
   );
 };
 
