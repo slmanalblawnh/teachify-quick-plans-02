@@ -1,76 +1,69 @@
+# Welcome to your Lovable project
 
-# تطبيق إعداد خطط الدروس - تطبيق أندرويد
+## Project info
 
-## تعليمات تشغيل المشروع في Visual Studio Code
+**URL**: https://lovable.dev/projects/76e38b04-f7d3-4678-9c82-caac960132e7
 
-لتشغيل المشروع في Visual Studio Code، اتبع الخطوات التالية:
+## How can I edit this code?
 
-1. قم بتثبيت Node.js وNPM من الموقع الرسمي: https://nodejs.org/
-2. قم بتثبيت Visual Studio Code من الموقع الرسمي: https://code.visualstudio.com/
-3. افتح Visual Studio Code وقم بتثبيت الإضافات التالية:
-   - ESLint
-   - Prettier
-   - TypeScript
-   - Vetur (لدعم ملفات Vue)
-4. افتح المشروع في Visual Studio Code عبر File > Open Folder وحدد مجلد المشروع
-5. افتح Terminal في Visual Studio Code عبر Terminal > New Terminal
-6. قم بتثبيت حزم المشروع عبر الأمر:
-   ```
-   npm install
-   ```
-7. لتشغيل المشروع في وضع التطوير:
-   ```
-   npm run dev
-   ```
-8. يمكنك الوصول للتطبيق عبر المتصفح على الرابط: http://localhost:8080
+There are several ways of editing your application.
 
-## تحويل المشروع إلى تطبيق أندرويد
+**Use Lovable**
 
-لتحويل المشروع إلى تطبيق أندرويد، اتبع الخطوات التالية:
+Simply visit the [Lovable Project](https://lovable.dev/projects/76e38b04-f7d3-4678-9c82-caac960132e7) and start prompting.
 
-1. تأكد من تثبيت Android Studio من الموقع الرسمي: https://developer.android.com/studio
-2. قم بإعداد Android SDK وتأكد من تثبيت أحدث إصدار من Android SDK
-3. أضف منصة أندرويد للمشروع:
-   ```
-   npx cap add android
-   ```
-4. قم ببناء المشروع:
-   ```
-   npm run build
-   ```
-5. قم بمزامنة الملفات مع مشروع أندرويد:
-   ```
-   npx cap sync
-   ```
-6. افتح المشروع في Android Studio:
-   ```
-   npx cap open android
-   ```
-7. في Android Studio، يمكنك تشغيل التطبيق على جهاز محاكاة أو جهاز حقيقي
+Changes made via Lovable will be committed automatically to this repo.
 
-## هيكل المشروع
+**Use your preferred IDE**
 
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
 ```
-teachify-quick-plans-02/
-├── public/                  # ملفات ثابتة (الصور والأيقونات)
-├── src/                     # كود المصدر
-│   ├── components/          # مكونات قابلة لإعادة الاستخدام
-│   │   ├── ui/              # مكونات واجهة المستخدم الأساسية
-│   │   ├── FormInput.tsx    # مكون حقل الإدخال
-│   │   ├── FormSelect.tsx   # مكون القائمة المنسدلة
-│   │   └── ...
-│   ├── hooks/               # هوكس React المخصصة
-│   ├── lib/                 # مكتبات وأدوات مساعدة
-│   ├── pages/               # صفحات التطبيق
-│   │   ├── Index.tsx        # الصفحة الرئيسية
-│   │   ├── LessonForm.tsx   # نموذج إنشاء خطة الدرس
-│   │   ├── PreviewEdit.tsx  # معاينة وتحرير خطة الدرس
-│   │   └── ...
-│   ├── services/            # خدمات وواجهات برمجة التطبيق
-│   ├── App.tsx              # مكون التطبيق الرئيسي
-│   └── main.tsx             # نقطة الدخول للتطبيق
-├── capacitor.config.ts      # إعدادات Capacitor
-├── vite.config.ts           # إعدادات Vite
-├── tsconfig.json            # إعدادات TypeScript
-└── package.json             # تبعيات المشروع
-```
+
+**Edit a file directly in GitHub**
+
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with .
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/76e38b04-f7d3-4678-9c82-caac960132e7) and click on Share -> Publish.
+
+## I want to use a custom domain - is that possible?
+
+We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
